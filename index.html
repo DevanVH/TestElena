@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Feliz 21 de septiembre piciosa</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" href="./assets/favicon_io/favicon.ico" type="image/x-icon">
+    <style>
+        #audio-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+        }
+
+        button {
+            background-color: rgba(red, green, blue, 0.1); /* Color de fondo */
+            border: none; /* Sin bordes */
+            color:  rgba(red, green, blue, 0.1);; /* Color del texto */
+            padding: 10px 15px; /* Espaciado interno */
+            margin: 5px; /* Margen entre botones */
+            cursor: pointer; /* Cambia el cursor al pasar el mouse */
+            border-radius: 5px; /* Bordes redondeados */
+            font-size: 16px; /* Tamaño de fuente */
+        }
+
+        button:hover {
+            background-color:  rgba(red, green, blue, 0.1);; /* Color al pasar el mouse */
+        }
+
+        input[type="range"] {
+            width: 100px; /* Ajusta el ancho del slider */
+            margin-left: 10px; /* Espacio entre botones y slider */
+        }
+    </style>
+    <script type="text/javascript" src="./js/paper-full.js"></script>
+    <script type="text/paperscript" canvas="canvas">
+        // Create a raster item using the image with id='creeper'
+        var raster = new Raster({
+            source: './assets/img.jpg',
+            smoothing: 'off',
+            onLoad: function() {
+                raster.fitBounds(view.bounds, true);
+            }
+        });
+        raster.visible = false;
+
+        var lastPos = view.center;
+
+        function moveHandler(event) {
+            if (lastPos.getDistance(event.point) < 10)
+                return;
+            lastPos = event.point;
+
+            var size = this.bounds.size.clone();
+            var isLandscape = size.width > size.height;
+
+            size /= isLandscape ? [2, 1] : [1, 2];
+
+            var path = new Path.Rectangle({
+                point: this.bounds.topLeft.floor(),
+                size: size.ceil(),
+                onMouseMove: moveHandler
+            });
+            path.fillColor = raster.getAverageColor(path);
+
+            var path2 = new Path.Rectangle({
+                point: isLandscape ? this.bounds.topCenter.ceil() : this.bounds.leftCenter.ceil(),
+                size: size.floor(),
+                onMouseMove: moveHandler
+            });
+            
+            path2.fillColor = raster.getAverageColor(path2);
+            this.remove();
+        }
+
+        function onResize(event) {
+            project.activeLayer.removeChildren();
+            raster.fitBounds(view.bounds, true);
+            new Path.Rectangle({
+                rectangle: view.bounds,
+                fillColor: raster.getAverageColor(view.bounds),
+                onMouseMove: moveHandler
+            });
+        }
+
+        // Obtener los botones
+        var playButton = document.getElementById('playButton');
+        var pauseButton = document.getElementById('pauseButton');
+        var volumeSlider = document.getElementById('volumeSlider');
+
+        // Función para reproducir audio
+        playButton.onclick = function() {
+            document.getElementById('audio').play();
+            playButton.style.display = 'none';
+            pauseButton.style.display = 'inline'; // Mostrar el botón de pausa
+        };
+
+        // Función para pausar audio
+        pauseButton.onclick = function() {
+            document.getElementById('audio').pause();
+            pauseButton.style.display = 'none';
+            playButton.style.display = 'inline'; // Mostrar el botón de reproducir
+        };
+
+        // Ajustar el volumen del audio al cambiar el slider
+        volumeSlider.oninput = function() {
+            document.getElementById('audio').volume = this.value;
+        };
+    </script>
+</head>
+<body>
+    <div id="audio-container">
+        <audio id="audio" src="assets/sound.mp3" preload="auto"></audio>
+        <button id="playButton">🤔</button>
+        <button id="pauseButton" style="display: none;">💐</button>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+    </div>
+    <canvas id="canvas" resize></canvas>
+    <img width="102" height="102" id="creeper" style="display: none;" src="assets/img.jpg">
+</body>
+</html>
